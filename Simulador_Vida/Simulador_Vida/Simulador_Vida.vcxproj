@@ -147,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Celda.h" />
+    <ClInclude Include="Consola.h" />
     <ClInclude Include="Mundo.h" />
     <ClInclude Include="Reglas.h" />
   </ItemGroup>
