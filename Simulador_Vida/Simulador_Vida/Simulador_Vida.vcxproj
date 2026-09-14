@@ -139,14 +139,14 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Celula.cpp" />
+    <ClCompile Include="Celda.cpp" />
     <ClCompile Include="Consola.cpp" />
     <ClCompile Include="Mundo.cpp" />
     <ClCompile Include="Reglas.cpp" />
     <ClCompile Include="Simulador_Vida.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Celula.h" />
+    <ClInclude Include="Celda.h" />
     <ClInclude Include="Mundo.h" />
     <ClInclude Include="Reglas.h" />
   </ItemGroup>
