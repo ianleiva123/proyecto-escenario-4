@@ -118,8 +118,7 @@ int SpeciesRules::getSurvivalRule(
     return -1;
 }
 
-bool SpeciesRules::survives(
-    int neighbors) const
+bool SpeciesRules::survives( int neighbors) const
 {
     for (int i = 0;
         i < survivalCount;

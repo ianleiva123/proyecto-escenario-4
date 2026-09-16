@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Simulador_Vida/Simulador_Vida.vcxproj" />
+  <Project Path="Simulador_Vida/Simulador_Vida.vcxproj" Id="7e33a5b9-f5a0-4ed9-988b-06200104f88f" />
 </Solution>
