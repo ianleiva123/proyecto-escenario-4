@@ -52,6 +52,7 @@ public:
         int columns,
         int speciesCount);
 
+    // [REVISION] BP-E2: setDefaultRules() es un auxiliar interno y deberia ser privado; publico permite llamarlo sin configure() y romper el objeto.
     void setDefaultRules();
 
     void seedManual(

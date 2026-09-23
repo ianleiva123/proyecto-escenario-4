@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 
+// [REVISION] BP-A2: "using namespace std;" en una cabecera contamina todo archivo que la incluya; use std::string aqui.
 using namespace std;
 
 class SpeciesRules

@@ -1,3 +1,4 @@
+// [REVISION] BP-A1: el archivo es "Reglas.h" pero aqui se incluye "reglas.h"; en Linux/macOS esto no compila.
 #include "reglas.h"
 
 SpeciesRules::SpeciesRules()

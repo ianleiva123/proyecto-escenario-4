@@ -156,6 +156,7 @@ World& World::operator=( const World& other)
 
 bool World::configure( int rows,int columns,int speciesCount)
 {
+    // [REVISION] BP-V3: 5, 50 y 3 son numeros magicos; declare MIN_SIZE, MAX_SIZE y SPECIES_COUNT como constantes con nombre.
     if (rows < 5 || rows > 50 || columns < 5 || columns > 50 || speciesCount != 3)
     {
         return false;
@@ -234,6 +235,10 @@ bool World::isInside( int row, int column) const
     return row >= 0 && row < rows && column >= 0 && column < columns;
 }
 
+// [NOTA] Esta funcion tiene 29 lineas y llega a 4 niveles de anidacion, el maximo que permite la guia.
+// Se puede bajar la anidacion extrayendo el cuerpo del ciclo interno a una funcion aparte, o usando
+// continue y salidas tempranas en vez de anidar condicionales.
+// Sugerencia, no afecta la nota.
 int World::countNeighbors( int row, int column) const
 {
     int count = 0;
@@ -264,6 +269,9 @@ int World::countNeighbors( int row, int column) const
     return count;
 }
 
+// [NOTA] Esta funcion tiene 51 lineas y llega a 4 niveles de anidacion, el maximo que permite la guia.
+// Conviene partirla en funciones privadas cortas y usar salidas tempranas en vez de anidar condicionales.
+// Sugerencia, no afecta la nota.
 int World::getDominantSpecies( int row, int column) const
 {
     int* speciesCounts = new int[speciesCount];
@@ -298,6 +306,7 @@ int World::getDominantSpecies( int row, int column) const
         }
     }
 
+    // [REVISION] PR-R7/PR-D5: CORRECTO. El ">" estricto conserva el primer maximo, o sea el desempate por menor indice de la Config 4.
     int dominantSpecies = 1;
     int highestCount = speciesCounts[0];
 
@@ -377,6 +386,10 @@ void World::seedRandom(double density)
     generation = 0;
 }
 
+// [NOTA] Esta funcion tiene 33 lineas y llega a 4 niveles de anidacion, el maximo que permite la guia.
+// Se puede bajar la anidacion extrayendo el cuerpo del ciclo interno a una funcion aparte, o usando
+// continue y salidas tempranas en vez de anidar condicionales.
+// Sugerencia, no afecta la nota.
 void World::seedPattern(int startRow,int startColumn)
 {
     int pattern[3][3] =
@@ -386,6 +399,7 @@ void World::seedPattern(int startRow,int startColumn)
         { 1, 1, 1 }
     };
 
+    // [REVISION] PR-R4: clearWorld() borra toda siembra previa y reinicia la generacion a 0 sin avisar al usuario.
     clearWorld();
 
     for (int i = 0; i < 3; i++)
@@ -400,6 +414,7 @@ void World::seedPattern(int startRow,int startColumn)
 
                 if (isInside(row,column))
                 {
+                    // [REVISION] PR-R4: esta formula NO produce el glider que el menu muestra en pantalla (. W . / . . S / G G G).
                     int species = ((i + j)% speciesCount) + 1;
 
                     cells[row][column].setSpecies(species);
@@ -411,6 +426,13 @@ void World::seedPattern(int startRow,int startColumn)
     generation = 0;
 }
 
+// [NOTA] Esta funcion tiene 52 lineas y llega a 4 niveles de anidacion, el maximo que permite la guia.
+// Hace tres cosas distintas a la vez: reservar la matriz nueva, decidir el estado de cada celda, y liberar
+// la matriz vieja e intercambiarla. Conviene separarla en funciones privadas cortas, por ejemplo una que
+// reserve la matriz, una que la libere, y una que reciba fila y columna y devuelva el estado que le toca a
+// esa celda. Con eso el cuerpo queda en el doble ciclo llamando a esa ultima, y la decision por celda se
+// escribe con clausulas guarda y salida temprana en vez de if/else anidados. Cada pieza se lee y se prueba
+// por separado. Sugerencia, no afecta la nota.
 void World::evolve()
 {
     if (cells == nullptr)
@@ -418,6 +440,7 @@ void World::evolve()
         return;
     }
 
+    // [REVISION] PR-R5: CORRECTO. Doble buffer real: se lee siempre de cells y se escribe en nextCells, que se intercambia al final.
     Cell** nextCells =new Cell * [rows];
 
     for (int i = 0; i < rows;i++)
@@ -482,6 +505,10 @@ void World::clearWorld()
     generation = 0;
 }
 
+// [NOTA] Esta funcion tiene 65 lineas y hace varias cosas distintas. La guia pide funciones cortas,
+// con una sola responsabilidad cada una.
+// Conviene partirla extrayendo cada bloque a su propia funcion privada, con un nombre que diga que hace.
+// Sugerencia, no afecta la nota.
 void World::display() const
 {
     if (cells == nullptr)
@@ -498,6 +525,7 @@ void World::display() const
 
     cout << "    ";
 
+    // [REVISION] PR-R9: con 10+ columnas el encabezado usa 3 caracteres y la rejilla 2; los numeros dejan de alinearse con las celdas.
     for (int j = 0; j < columns; j++)
     {
         cout << j + 1 << " ";
@@ -543,11 +571,16 @@ void World::display() const
 
     cout << endl;
 
+    // [REVISION] BP-U1: la leyenda dice Worker/Scout/Guardian pero las estadisticas dicen Trabajador/Explorador; unifique los nombres en espanol.
     cout << "W = Worker" << endl;
     cout << "S = Scout" << endl;
     cout << "G = Guardian" << endl;
 }
 
+// [NOTA] Esta funcion tiene 52 lineas y hace varias cosas distintas. La guia pide funciones cortas,
+// con una sola responsabilidad cada una.
+// Conviene partirla extrayendo cada bloque a su propia funcion privada, con un nombre que diga que hace.
+// Sugerencia, no afecta la nota.
 void World::showStatistics() const
 {
     if (cells == nullptr)
@@ -601,6 +634,10 @@ void World::showStatistics() const
     delete[] population;
 }
 
+// [NOTA] Esta funcion tiene 45 lineas y hace varias cosas distintas. La guia pide funciones cortas,
+// con una sola responsabilidad cada una.
+// Conviene partirla extrayendo cada bloque a su propia funcion privada, con un nombre que diga que hace.
+// Sugerencia, no afecta la nota.
 void World::showRules() const
 {
     cout << endl;
@@ -647,6 +684,7 @@ void World::showRules() const
     cout << "==================================" << endl;
 }
 
+// [REVISION] PR-D1: no se valida que cada valor este en 0..8; un 0 de nacimiento llena el mundo entero de E1 en una generacion.
 void World::setBirthRules(int* rules,int count)
 {
     if (rules == nullptr ||count <= 0)

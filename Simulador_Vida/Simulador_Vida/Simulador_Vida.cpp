@@ -8,6 +8,7 @@
 
 using namespace std;
 
+// [REVISION] BP-N3: las constantes van en MAYUSCULAS_CON_GUION_BAJO (SPECIES_COUNT); ademas es global (BP-Z3, sugerencia).
 const int speciesCount = 3;
 
 int readInteger(string message)
@@ -23,6 +24,7 @@ int readInteger(string message)
             return value;
         }
 
+        // [REVISION] PR-R1: si cin llega a fin de archivo (Ctrl+Z o entrada redirigida), clear() no quita esa condicion y este while imprime el error infinitamente.
         cout << "Entrada invalida."
             << endl;
 
@@ -51,6 +53,10 @@ double readDouble(string message)
     }
 }
 
+// [NOTA] main tiene 337 lineas y llega a 5 niveles de anidacion. La guia pide un maximo de 4 por funcion.
+// Conviene extraer cada opcion del menu a su propia funcion y dejar aqui solo el ciclo que lee la opcion.
+// Eso ademas elimina el bloque de guarda isConfigured() que hoy esta repetido nueve veces.
+// Sugerencia, no afecta la nota.
 int main()
 {
     srand(time(nullptr));
@@ -328,6 +334,7 @@ int main()
 
                 int survivalCount = readInteger("Cantidad de valores: ");
 
+                // [REVISION] PR-D2: este break sale del for de especies, no solo de esta; E2 y E3 quedan sin configurar y aun asi se dice "Reglas actualizadas correctamente".
                 if (survivalCount <= 0 ||survivalCount > 8)
                 {
                     cout << "Cantidad invalida." << endl;
