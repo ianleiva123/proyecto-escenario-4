@@ -161,6 +161,8 @@
     <ClInclude Include="src\species_rules.h" />
     <ClInclude Include="src\world.h" />
     <ClInclude Include="src\world_size.h" />
+    <ClInclude Include="src\species.h" />
+
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Simulador_Vida.cpp" />
@@ -171,6 +173,8 @@
     <ClCompile Include="src\species_rules.cpp" />
     <ClCompile Include="src\world.cpp" />
     <ClCompile Include="src\world_size.cpp" />
+    <ClCompile Include="src\species.cpp" />
+
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
