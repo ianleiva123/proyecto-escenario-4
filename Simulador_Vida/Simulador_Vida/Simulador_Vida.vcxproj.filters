@@ -15,33 +15,51 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Simulador_Vida.cpp">
+    <ClCompile Include="src\Simulador_Vida.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Celda.cpp">
+    <ClCompile Include="src\cell.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Reglas.cpp">
+    <ClCompile Include="src\console_display.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Mundo.cpp">
+    <ClCompile Include="src\position.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Consola.cpp">
+    <ClCompile Include="src\rule_list.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\species_rules.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\world_size.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Celda.h">
+    <ClInclude Include="src\cell.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Reglas.h">
+    <ClInclude Include="src\console_display.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Mundo.h">
+    <ClInclude Include="src\position.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Consola.h">
+    <ClInclude Include="src\rule_list.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\species_rules.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\world_size.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
