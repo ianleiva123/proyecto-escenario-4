@@ -1,86 +1,46 @@
 #pragma once
-#include "cell.h"
-#include "rule_list.h"
-#include "species_rules.h"
-#include "world_size.h"
-#include "position.h"
-
-const int MIN_SIZE = 5;
-const int MAX_SIZE = 50;
-const int MIN_SPECIES = 3;
-const int MAX_SPECIES = 4;
-const int PERCENT_BASE = 100;
-
+#include <string>
+#include "species.h"
+using namespace std;
 class World
 {
 private:
-    int rows;
-    int columns;
-    int speciesCount;
-    int generation;
-
-    Cell** cellMatrix;
-
-    RuleList birthRuleList;
-
-    SpeciesRules* speciesRuleList;
-
-    static Cell** createMatrix(int rowCount, int columnCount);
-    static void deleteMatrix(Cell** matrix, int rowCount);
-
+    string name;
+    int rows, columns, speciesCount, generation;
+    int** cells;
+    SpeciesBase* species[4];
+    bool moore, wrapped;
+    int speed, density;
+    void release();
     void copyFrom(const World& other);
-
-    void setDefaultRules();
-
-    bool isInside(int row, int column) const;
-
-    int countNeighbors(int row, int column) const;
-
-    Species getDominantSpecies(int row, int column) const;
-
-    bool canBeBorn(int neighbors) const;
-
-    void emptyCells();
-
-    void clearCells();
-
+    void countNeighbors(int row, int column, int counts[4], int& total) const;
 public:
-    World();
-
-    World(WorldSize size, int newSpeciesCount);
-
+    World(const string& newName = "Mundo", int newRows = 20, int newColumns = 25, int newSpeciesCount = 3);
     World(const World& other);
-
     ~World();
-
     World& operator=(const World& other);
-
-    bool configure(WorldSize size, int newSpeciesCount);
-
-    bool seedManual(Position position, Species species);
-
-    void seedRandom(double density);
-
-    bool seedPattern(Position start);
-
-    void evolve();
-
-    void clearWorld();
-
-    void display() const;
-
-    void showStatistics() const;
-
-    void showRules() const;
-
-    bool setBirthRules(const RuleList& rules);
-
-    bool setSpeciesSurvivalRules(Species species, const RuleList& rules);
-
+    static bool validConfiguration(const string& name, int rows, int columns, int speciesCount);
+    const string& getName() const;
+    void setName(const string& newName);
     int getRows() const;
     int getColumns() const;
     int getSpeciesCount() const;
     int getGeneration() const;
-
-    bool isConfigured() const;
+    int getCell(int row, int column) const;
+    bool setCell(int row, int column, int value);
+    const SpeciesBase& getSpecies(int id) const;
+    bool toggleRule(int id, bool isBirth, int neighbors);
+    bool isMoore() const;
+    bool isWrapped() const;
+    void toggleNeighborhood();
+    void toggleBorder();
+    int getSpeed() const;
+    bool setSpeed(int value);
+    int getDensity() const;
+    bool setDensity(int value);
+    int getPopulation(int id) const;
+    void clear();
+    void seedRandom();
+    bool seedPattern(int row, int column);
+    void evolve();
 };

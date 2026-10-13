@@ -42,7 +42,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -154,27 +154,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\cell.h" />
-    <ClInclude Include="src\console_display.h" />
-    <ClInclude Include="src\position.h" />
-    <ClInclude Include="src\rule_list.h" />
-    <ClInclude Include="src\species_rules.h" />
     <ClInclude Include="src\world.h" />
-    <ClInclude Include="src\world_size.h" />
     <ClInclude Include="src\species.h" />
-
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Simulador_Vida.cpp" />
-    <ClCompile Include="src\cell.cpp" />
-    <ClCompile Include="src\console_display.cpp" />
-    <ClCompile Include="src\position.cpp" />
-    <ClCompile Include="src\rule_list.cpp" />
-    <ClCompile Include="src\species_rules.cpp" />
     <ClCompile Include="src\world.cpp" />
-    <ClCompile Include="src\world_size.cpp" />
     <ClCompile Include="src\species.cpp" />
-
+    <ClCompile Include="src\prueba.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
