@@ -158,6 +158,8 @@
     <ClInclude Include="src\species.h" />
     <ClInclude Include="src\timeline.h" />
     <ClInclude Include="src\laboratory.h" />
+    <ClInclude Include="src\view.h" />
+    <ClInclude Include="src\sfml_view.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Simulador_Vida.cpp" />
@@ -165,6 +167,8 @@
     <ClCompile Include="src\species.cpp" />
     <ClCompile Include="src\timeline.cpp" />
     <ClCompile Include="src\laboratory.cpp" />
+    <ClCompile Include="src\sfml_view.cpp" />
+
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
