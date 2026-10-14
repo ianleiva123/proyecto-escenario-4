@@ -156,12 +156,15 @@
   <ItemGroup>
     <ClInclude Include="src\world.h" />
     <ClInclude Include="src\species.h" />
+    <ClInclude Include="src\timeline.h" />
+    <ClInclude Include="src\laboratory.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Simulador_Vida.cpp" />
     <ClCompile Include="src\world.cpp" />
     <ClCompile Include="src\species.cpp" />
-    <ClCompile Include="src\prueba.cpp" />
+    <ClCompile Include="src\timeline.cpp" />
+    <ClCompile Include="src\laboratory.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
