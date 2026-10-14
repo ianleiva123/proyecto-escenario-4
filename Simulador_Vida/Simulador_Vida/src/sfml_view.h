@@ -4,6 +4,7 @@
 class SfmlView : public View
 {
 private:
+
     Laboratory* laboratoryReference; 
     sf::RenderWindow window;
     sf::Font font;

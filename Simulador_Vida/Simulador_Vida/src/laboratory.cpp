@@ -68,5 +68,6 @@ const World* Laboratory::getWorldAt(int index) const
     for (int i = 0; i < index && node != nullptr; i++) node = node->next;
     return node == nullptr ? nullptr : &node->history.getWorld();
 }
+
 const Timeline* Laboratory::getActive() const { return active == nullptr ? nullptr : &active->history; }
 Timeline* Laboratory::getActive() { return active == nullptr ? nullptr : &active->history; }

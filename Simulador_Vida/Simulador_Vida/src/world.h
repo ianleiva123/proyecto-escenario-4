@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "species.h"
+
 using namespace std;
 class World
 {
@@ -10,7 +11,8 @@ private:
     int** cells;
     SpeciesBase* species[4];
     bool moore, wrapped;
-    int speed, density;
+    int speed, mutationPercent, density;
+    bool mutationEnabled;
     void release();
     void copyFrom(const World& other);
     void countNeighbors(int row, int column, int counts[4], int& total) const;
@@ -38,6 +40,10 @@ public:
     bool setSpeed(int value);
     int getDensity() const;
     bool setDensity(int value);
+    int getMutationPercent() const;
+    bool setMutationPercent(int value);
+    bool isMutationEnabled() const;
+    void toggleMutation();
     int getPopulation(int id) const;
     void clear();
     void seedRandom();

@@ -43,6 +43,7 @@ public:
     char getSymbol() const override;
     unsigned int getColor() const override;
     int getShape() const override;
+
 };
 class Queen : public SpeciesBase
 {

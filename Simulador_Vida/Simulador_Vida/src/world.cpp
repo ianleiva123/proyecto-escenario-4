@@ -4,7 +4,7 @@
 #include <utility>
 World::World(const string& newName, int newRows, int newColumns, int newSpeciesCount)
     : name(newName), rows(newRows), columns(newColumns), speciesCount(newSpeciesCount), generation(0),
-      cells(nullptr), moore(true), wrapped(false), speed(5), density(30)
+      cells(nullptr), moore(true), wrapped(false), speed(5), mutationPercent(10), density(30), mutationEnabled(false)
 {
     if (!validConfiguration(name, rows, columns, speciesCount)) throw invalid_argument("Configuracion invalida");
     for (int i = 0; i < 4; i++) species[i] = nullptr;
@@ -28,7 +28,7 @@ void World::copyFrom(const World& other)
 {
     name = other.name; rows = other.rows; columns = other.columns; speciesCount = other.speciesCount;
     generation = other.generation; moore = other.moore; wrapped = other.wrapped; speed = other.speed;
-    density = other.density;
+    mutationPercent = other.mutationPercent; density = other.density; mutationEnabled = other.mutationEnabled;
     for (int i = 0; i < 4; i++) species[i] = other.species[i] == nullptr ? nullptr : other.species[i]->clone();
     cells = new int*[rows];
     for (int r = 0; r < rows; r++)
@@ -41,13 +41,13 @@ World::World(const World& other) { copyFrom(other); }
 World::~World() { release(); }
 World& World::operator=(const World& other)
 {
-    if (this != &other) { World copy(other); 
+    if (this != &other) { World copy(other); // La copia se completa antes de liberar el estado anterior.
         using std::swap;
         swap(name, copy.name); swap(rows, copy.rows); swap(columns, copy.columns); swap(speciesCount, copy.speciesCount);
         swap(generation, copy.generation); swap(cells, copy.cells);
         for (int i = 0; i < 4; i++) swap(species[i], copy.species[i]);
         swap(moore, copy.moore); swap(wrapped, copy.wrapped); swap(speed, copy.speed);
-        swap(density, copy.density);
+        swap(mutationPercent, copy.mutationPercent); swap(density, copy.density); swap(mutationEnabled, copy.mutationEnabled);
     }
     return *this;
 }
@@ -80,6 +80,10 @@ int World::getSpeed() const { return speed; }
 bool World::setSpeed(int value) { if (value < 1 || value > 20 || value == speed) return false; speed = value; return true; }
 int World::getDensity() const { return density; }
 bool World::setDensity(int value) { if (value < 0 || value > 100 || value == density) return false; density = value; return true; }
+int World::getMutationPercent() const { return mutationPercent; }
+bool World::setMutationPercent(int value) { if (value < 0 || value > 100 || value == mutationPercent) return false; mutationPercent = value; return true; }
+bool World::isMutationEnabled() const { return mutationEnabled; }
+void World::toggleMutation() { mutationEnabled = !mutationEnabled; }
 int World::getPopulation(int id) const
 {
     int count = 0;
@@ -98,7 +102,7 @@ bool World::seedPattern(int row, int column)
 {
     if (row < 0 || column < 0 || row + 2 >= rows || column + 2 >= columns) return false;
     const int pattern[3][3] = { {0,1,0}, {0,0,2}, {3,3,3} };
- 
+    // Solo reemplaza el bloque de 3x3, conservando el resto del mundo.
     for (int r = 0; r < 3; r++) for (int c = 0; c < 3; c++) cells[row+r][column+c] = pattern[r][c];
     return true;
 }
@@ -127,14 +131,21 @@ void World::evolve()
         if (current == 0)
         {
             int best = 0;
-            
+            // El ganador es la especie mayoritaria; empates: menor indice.
+            // Con cero vecinos se elige E1 si su regla B0 esta habilitada.
             for (int i = 1; i < speciesCount; i++) if (counts[i] > counts[best]) best = i;
             if (species[best]->canBeBorn(total)) next[r][c] = best + 1;
         }
         else if (species[current - 1]->survives(total))
         {
             next[r][c] = current;
-
+            if (mutationEnabled && rand() % 100 < mutationPercent)
+            {
+                // Escoge uniformemente entre las otras especies, sin repetir la actual.
+                int candidate = 1 + rand() % (speciesCount - 1);
+                if (candidate >= current) candidate++;
+                next[r][c] = candidate;
+            }
         }
     }
     for (int r = 0; r < rows; r++) delete[] cells[r];

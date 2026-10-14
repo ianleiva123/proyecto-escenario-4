@@ -5,4 +5,5 @@ class View
 public:
     virtual ~View() {}
     virtual void run(Laboratory& laboratory) = 0;
+
 };

@@ -130,6 +130,9 @@ void SfmlView::draw(Laboratory& laboratory)
         button(world.isWrapped()?"Borde: toroidal":"Borde: cerrado",1040,477,190);
         text("Velocidad: "+to_string(world.getSpeed())+" gen/s",830,526,14);
         button("-",1130,519,42); button("+",1184,519,42);
+        button(world.isMutationEnabled()?"Mutacion: SI":"Mutacion: NO",830,566,170,world.isMutationEnabled());
+        text(to_string(world.getMutationPercent())+" %",1010,573,15);
+        button("-",1130,566,42); button("+",1184,566,42);
         text("Densidad: "+to_string(world.getDensity())+" %",830,621,14);
         button("-",1130,614,42); button("+",1184,614,42);
         text("W cuadrado | S circulo | G triangulo | Q rombo",830,668,12);
@@ -192,7 +195,7 @@ void SfmlView::paint(Laboratory& laboratory, bool erase)
     {
         bool left=leftDown, right=rightDown;
         changed(*timeline,erase?"Celda borrada.":"Celda pintada.");
-        leftDown=left; rightDown=right; // Mantiene la edicion por arrastre.
+        leftDown=left; rightDown=right; 
     }
 }
 void SfmlView::click(Laboratory& laboratory)
@@ -226,11 +229,13 @@ void SfmlView::click(Laboratory& laboratory)
     }
     if (hit(830,477,200,32)) { world.toggleNeighborhood(); changed(*timeline,"Vecindario actualizado."); return; }
     if (hit(1040,477,190,32)) { world.toggleBorder(); changed(*timeline,"Borde actualizado."); return; }
+    if (hit(830,566,170,32)) { world.toggleMutation(); changed(*timeline,"Mutacion actualizada."); return; }
     for (int i=0; i<2; i++)
     {
         int direction=i==0?-1:1;
         float x=i==0?1130.f:1184.f;
         if (hit(x,519,42,32)) { if (world.setSpeed(world.getSpeed()+direction)) changed(*timeline,"Velocidad actualizada."); return; }
+        if (hit(x,566,42,32)) { if (world.setMutationPercent(world.getMutationPercent()+direction*5)) changed(*timeline,"Probabilidad actualizada."); return; }
         if (hit(x,614,42,32)) { if (world.setDensity(world.getDensity()+direction*5)) changed(*timeline,"Densidad actualizada."); return; }
     }
     if (hit(30,751,100,32)) { stop(); patternMode=false; timeline->backward(); message="Estado anterior restaurado."; return; }
@@ -266,7 +271,7 @@ void SfmlView::processEvent(const sf::Event& event, Laboratory& laboratory)
         string& value=fields[focusedField];
         if (character==8 && !value.empty())
         {
-            
+         
             while (!value.empty() && (static_cast<unsigned char>(value.back()) & 0xC0)==0x80) value.pop_back();
             if (!value.empty()) value.pop_back();
         }

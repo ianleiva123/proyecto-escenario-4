@@ -4,7 +4,8 @@ class Timeline
 {
 private:
     struct HistoryNode
-    {
+    { 
+
         World state;
         HistoryNode* previous;
         HistoryNode* next;
