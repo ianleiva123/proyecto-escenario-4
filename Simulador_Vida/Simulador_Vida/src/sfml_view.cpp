@@ -126,6 +126,7 @@ void SfmlView::draw(Laboratory& laboratory)
             button(to_string(n),830.f+n*45,409,39,world.getSpecies(activeSpecies).getRule(false,n),enabled);
         }
         text("Resaltado = regla habilitada. Clic para alternar.",830,450,12);
+        // FEEDBACK: las coordenadas de cada boton se escriben dos veces, aqui en draw() y otra vez en click() (por ejemplo 830,477,200 en la linea 230). Si se mueve uno y no el otro, el clic deja de coincidir. Definan cada boton una sola vez (constantes o un arreglo de rectangulos) y usenlo en ambos lados.
         button(world.isMoore()?"Moore (8)":"Von Neumann (4)",830,477,200);
         button(world.isWrapped()?"Borde: toroidal":"Borde: cerrado",1040,477,190);
         text("Velocidad: "+to_string(world.getSpeed())+" gen/s",830,526,14);
@@ -234,10 +235,12 @@ void SfmlView::click(Laboratory& laboratory)
     {
         int direction=i==0?-1:1;
         float x=i==0?1130.f:1184.f;
+        // FEEDBACK: cambiar la velocidad (o la densidad) llama changed(), que descarta el futuro y pausa la reproduccion. La velocidad no modifica el estado del mundo: no deberia borrar generaciones. Ademas vive dentro de World, asi que al retroceder vuelve el valor viejo. Muevanla a la vista o al laboratorio.
         if (hit(x,519,42,32)) { if (world.setSpeed(world.getSpeed()+direction)) changed(*timeline,"Velocidad actualizada."); return; }
         if (hit(x,566,42,32)) { if (world.setMutationPercent(world.getMutationPercent()+direction*5)) changed(*timeline,"Probabilidad actualizada."); return; }
         if (hit(x,614,42,32)) { if (world.setDensity(world.getDensity()+direction*5)) changed(*timeline,"Densidad actualizada."); return; }
     }
+    // FEEDBACK: si no hay estado anterior, backward() devuelve false y aun asi se muestra "Estado anterior restaurado.". Usen el valor de retorno para elegir el mensaje.
     if (hit(30,751,100,32)) { stop(); patternMode=false; timeline->backward(); message="Estado anterior restaurado."; return; }
     if (hit(140,751,120,32)) { stop(); patternMode=false; timeline->forward(); message="Generacion avanzada."; return; }
     if (hit(270,751,120,32)) { playing=!playing; patternMode=false; playbackClock.restart(); return; }
@@ -305,6 +308,7 @@ void SfmlView::processEvent(const sf::Event& event, Laboratory& laboratory)
 }
 void SfmlView::run(Laboratory& laboratory)
 {
+    // FEEDBACK: laboratoryReference es redundante: run() ya recibe laboratory y lo puede pasar a draw() directamente. Quiten el atributo.
     laboratoryReference = &laboratory;
     while (window.isOpen())
     {

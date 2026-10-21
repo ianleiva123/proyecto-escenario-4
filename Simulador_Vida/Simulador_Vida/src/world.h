@@ -9,6 +9,7 @@ private:
     string name;
     int rows, columns, speciesCount, generation;
     int** cells;
+    // FEEDBACK: el 4 (maximo de especies) aparece suelto en species[4], counts[4] y en los for (i < 4). Igual 5, 50 y 24 en validConfiguration. Declaren constantes (MAX_SPECIES, MIN_SIZE...) y un enum class para la especie de la celda; viene pendiente de la Etapa 1.
     SpeciesBase* species[4];
     bool moore, wrapped;
     int speed, mutationPercent, density;

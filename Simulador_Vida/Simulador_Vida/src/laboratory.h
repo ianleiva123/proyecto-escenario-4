@@ -28,6 +28,7 @@ public:
     bool selectId(int id);
     int getCount() const;
     int getActiveId() const;
+    // FEEDBACK: getIdAt(), getWorldAt() y selectId() no se usan en ningun lado. Es codigo muerto: quitenlo o usenlo (por ejemplo para una lista de mundos clicable).
     int getIdAt(int index) const;
     const World* getWorldAt(int index) const;
     const Timeline* getActive() const;

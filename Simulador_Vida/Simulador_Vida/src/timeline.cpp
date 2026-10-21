@@ -43,6 +43,7 @@ bool Timeline::backward()
 void Timeline::forward()
 {
     if (current->next != nullptr) { current = current->next; return; }
+    // FEEDBACK: el historial crece sin limite: cada generacion guarda una copia completa del mundo. Reproduciendo a 20 gen/s en 50x50 son varios MB por minuto. Consideren un tope de nodos (descartando los mas viejos) o avisarle al usuario.
     World next(current->state);
     next.evolve();
     HistoryNode* node = new HistoryNode(next);

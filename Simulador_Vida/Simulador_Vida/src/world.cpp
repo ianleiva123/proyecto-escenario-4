@@ -20,6 +20,7 @@ bool World::validConfiguration(const string& name, int rows, int columns, int sp
 }
 void World::release()
 {
+    // FEEDBACK: varias sentencias por linea e if sin llaves (aqui, 44-51, 151-152 y en casi todo sfml_view.cpp). Una sentencia por linea y llaves siempre: Ctrl+K, Ctrl+D ayuda con el espaciado, pero la separacion de lineas es manual.
     if (cells != nullptr) { for (int r = 0; r < rows; r++) delete[] cells[r]; delete[] cells; }
     for (int i = 0; i < 4; i++) { delete species[i]; species[i] = nullptr; }
     cells = nullptr;
