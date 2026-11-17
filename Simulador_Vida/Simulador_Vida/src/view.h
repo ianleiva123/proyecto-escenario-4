@@ -3,8 +3,6 @@
 class View
 {
   public:
-    virtual ~View()
-    {
-    }
+    virtual ~View() = default;
     virtual void run(Laboratory &laboratory) = 0;
 };

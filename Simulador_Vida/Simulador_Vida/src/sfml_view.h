@@ -1,39 +1,74 @@
 #pragma once
+#include "configuration.h"
+#include "layout.h"
 #include "view.h"
 #include <SFML/Graphics.hpp>
 class SfmlView : public View
 {
   private:
-    Laboratory *laboratoryReference;
+    enum class Modal
+    {
+        None,
+        Create,
+        Delete,
+        NewLab,
+        Save,
+        Load
+    };
     sf::RenderWindow window;
     sf::Font font;
-    bool fontReady, playing, creating, patternMode, deleting;
-    int activeSpecies, focusedField;
+    Configuration configuration;
+    bool fontReady;
+    bool patternMode;
+    bool leftDown;
+    bool rightDown;
+    bool resumeAfterModal;
+    bool replaceInput;
+    Modal modal;
+    int focusedField;
     std::string fields[4];
+    std::string fileName;
     std::string message;
+    std::string notice;
     sf::Clock playbackClock;
     sf::Vector2f pointer;
-    bool leftDown, rightDown;
     void text(const std::string &value, float x, float y, unsigned int size = 15,
               sf::Color color = sf::Color(222, 232, 241));
-    void rectangle(float x, float y, float width, float height, sf::Color color);
-    bool button(const std::string &label, float x, float y, float width, bool selected = false,
+    void wrappedText(const std::string &value, float x, float y, int width = 115, unsigned int size = 13);
+    void rectangle(const sf::FloatRect &bounds, sf::Color color);
+    bool over(layout::Control control) const;
+    void button(layout::Control control, const std::string &label, bool selected = false,
                 bool enabled = true);
-    bool hit(float x, float y, float width, float height) const;
-    void draw(Laboratory &laboratory);
+    float cellSize(const World &world) const;
     void drawWorld(const World &world);
-    void drawCreation();
+    void drawTop(const Laboratory &laboratory);
+    void drawInformation(const Laboratory &laboratory, const Timeline &timeline);
+    void drawRules(const Laboratory &laboratory, const World &world);
+    void drawSettings(const Laboratory &laboratory, const World &world);
+    void drawTime(const Laboratory &laboratory, const Timeline &timeline);
+    void drawModal();
+    void draw(Laboratory &laboratory);
+    void stop(Laboratory &laboratory);
+    void changed(Laboratory &laboratory, const std::string &detail);
+    void openModal(Modal value, Laboratory &laboratory);
+    void cancelModal(Laboratory &laboratory);
+    void confirmModal(Laboratory &laboratory);
+    void submitCreation(Laboratory &laboratory);
+    void processInput(sf::Uint32 character);
+    void processKey(const sf::Event::KeyEvent &key, Laboratory &laboratory);
+    void processEvent(const sf::Event &event, Laboratory &laboratory);
+    bool handleTop(Laboratory &laboratory);
+    bool handleRules(Laboratory &laboratory);
+    bool handleSettings(Laboratory &laboratory);
+    bool handleTime(Laboratory &laboratory);
     void click(Laboratory &laboratory);
     void paint(Laboratory &laboratory, bool erase);
-    void processEvent(const sf::Event &event, Laboratory &laboratory);
-    void changed(Timeline &timeline, const std::string &detail);
-    void stop();
-    void openCreation();
-    void submitCreation(Laboratory &laboratory);
+    void stepBackward(Laboratory &laboratory);
+    void stepForward(Laboratory &laboratory);
     static bool parseInteger(const std::string &value, int &result);
-    float cellSize(const World &world) const;
+    bool validFileName() const;
 
   public:
-    SfmlView();
+    SfmlView(const Configuration &configuration, const std::string &startupMessage);
     void run(Laboratory &laboratory) override;
 };
