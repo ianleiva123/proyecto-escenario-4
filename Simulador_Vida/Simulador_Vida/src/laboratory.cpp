@@ -165,5 +165,6 @@ const Timeline *Laboratory::getActive() const
 }
 Timeline *Laboratory::getActive()
 {
+
     return active == nullptr ? nullptr : &active->history;
 }
