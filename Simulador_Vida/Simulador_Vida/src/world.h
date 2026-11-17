@@ -2,29 +2,39 @@
 #include "species.h"
 #include <string>
 
-using namespace std;
+class FileManager;
 class World
 {
+    friend class FileManager;
+
   private:
-    string name;
-    int rows, columns, speciesCount, generation;
-    int **cells;
-    SpeciesBase *species[4];
-    bool moore, wrapped;
-    int speed, mutationPercent, density;
+    std::string name;
+    WorldSize size;
+    int speciesCount;
+    int generation;
+    SpeciesId **cellMatrix;
+    SpeciesBase *species[MAX_SPECIES];
+    bool moore;
+    bool wrapped;
+    int mutationPercent;
     bool mutationEnabled;
+    std::uint32_t randomState;
+    static SpeciesId **createMatrix(WorldSize size);
+    static void deleteMatrix(SpeciesId **matrix, int rows);
     void release();
     void copyFrom(const World &other);
-    void countNeighbors(int row, int column, int counts[4], int &total) const;
+    void countNeighbors(int row, int column, int counts[MAX_SPECIES], int &total) const;
+    unsigned int nextRandom();
 
   public:
-    World(const string &newName = "Mundo", int newRows = 20, int newColumns = 25, int newSpeciesCount = 3);
+    World(const std::string &name = "Mundo", WorldSize size = WorldSize(), int speciesCount = MIN_SPECIES);
     World(const World &other);
     ~World();
     World &operator=(const World &other);
-    static bool validConfiguration(const string &name, int rows, int columns, int speciesCount);
-    const string &getName() const;
-    void setName(const string &newName);
+    void swap(World &other) noexcept;
+    static bool validConfiguration(const std::string &name, WorldSize size, int speciesCount);
+    const std::string &getName() const;
+    void setName(const std::string &name);
     int getRows() const;
     int getColumns() const;
     int getSpeciesCount() const;
@@ -33,21 +43,18 @@ class World
     bool setCell(int row, int column, int value);
     const SpeciesBase &getSpecies(int id) const;
     bool toggleRule(int id, bool isBirth, int neighbors);
+    void setRules(int id, const bool birth[RULE_COUNT], const bool survival[RULE_COUNT]);
     bool isMoore() const;
     bool isWrapped() const;
     void toggleNeighborhood();
     void toggleBorder();
-    int getSpeed() const;
-    bool setSpeed(int value);
-    int getDensity() const;
-    bool setDensity(int value);
     int getMutationPercent() const;
     bool setMutationPercent(int value);
     bool isMutationEnabled() const;
     void toggleMutation();
     int getPopulation(int id) const;
     void clear();
-    void seedRandom();
+    void seedRandom(int densityPercent);
     bool seedPattern(int row, int column);
-    void evolve();
+    bool evolve();
 };

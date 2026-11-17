@@ -1,7 +1,7 @@
 #include "species.h"
 SpeciesBase::SpeciesBase()
 {
-    for (int i = 0; i <= 8; i++)
+    for (int i = 0; i <= MAX_NEIGHBORS; i++)
     {
         birth[i] = i == 3 || i == 6;
         survival[i] = i == 2 || i == 3;
@@ -17,7 +17,7 @@ bool SpeciesBase::survives(int neighbors) const
 }
 bool SpeciesBase::getRule(bool isBirth, int neighbors) const
 {
-    if (neighbors < 0 || neighbors > 8)
+    if (neighbors < 0 || neighbors > MAX_NEIGHBORS)
     {
         return false;
     }
@@ -25,7 +25,7 @@ bool SpeciesBase::getRule(bool isBirth, int neighbors) const
 }
 bool SpeciesBase::toggleRule(bool isBirth, int neighbors)
 {
-    if (neighbors < 0 || neighbors > 8)
+    if (neighbors < 0 || neighbors > MAX_NEIGHBORS)
     {
         return false;
     }
@@ -55,9 +55,9 @@ unsigned int Worker::getColor() const
 {
     return 0x48D8B0;
 }
-int Worker::getShape() const
+Shape Worker::getShape() const
 {
-    return 0;
+    return Shape::Square;
 }
 SpeciesBase *Scout::clone() const
 {
@@ -75,9 +75,9 @@ unsigned int Scout::getColor() const
 {
     return 0x62B6FF;
 }
-int Scout::getShape() const
+Shape Scout::getShape() const
 {
-    return 1;
+    return Shape::Circle;
 }
 SpeciesBase *Guardian::clone() const
 {
@@ -85,7 +85,7 @@ SpeciesBase *Guardian::clone() const
 }
 const char *Guardian::getName() const
 {
-    return "Guardian";
+    return "Guardián";
 }
 char Guardian::getSymbol() const
 {
@@ -95,9 +95,9 @@ unsigned int Guardian::getColor() const
 {
     return 0xFFCA68;
 }
-int Guardian::getShape() const
+Shape Guardian::getShape() const
 {
-    return 2;
+    return Shape::Triangle;
 }
 SpeciesBase *Queen::clone() const
 {
@@ -115,7 +115,16 @@ unsigned int Queen::getColor() const
 {
     return 0xD69AFF;
 }
-int Queen::getShape() const
+Shape Queen::getShape() const
 {
-    return 3;
+    return Shape::Diamond;
+}
+
+void SpeciesBase::setRules(const bool newBirth[RULE_COUNT], const bool newSurvival[RULE_COUNT])
+{
+    for (int i = 0; i < RULE_COUNT; i++)
+    {
+        birth[i] = newBirth[i];
+        survival[i] = newSurvival[i];
+    }
 }

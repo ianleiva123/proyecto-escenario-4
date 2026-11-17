@@ -31,7 +31,7 @@ SfmlView::SfmlView()
     fields[2] = "25";
     fields[3] = "3";
 }
-void SfmlView::text(const string &value, float x, float y, unsigned int size, sf::Color color)
+void SfmlView::text(const std::string &value, float x, float y, unsigned int size, sf::Color color)
 {
     if (!fontReady)
     {
@@ -56,7 +56,7 @@ bool SfmlView::hit(float x, float y, float width, float height) const
 {
     return pointer.x >= x && pointer.x < x + width && pointer.y >= y && pointer.y < y + height;
 }
-bool SfmlView::button(const string &label, float x, float y, float width, bool selected, bool enabled)
+bool SfmlView::button(const std::string &label, float x, float y, float width, bool selected, bool enabled)
 {
     sf::Color color = selected ? sf::Color(39, 104, 93) : CONTROL;
     if (enabled && hit(x, y, width, 32) && !creating && !deleting)
@@ -89,14 +89,16 @@ void SfmlView::drawWorld(const World &world)
             unsigned int rgb = species.getColor();
             sf::Color color(static_cast<sf::Uint8>(rgb >> 16), static_cast<sf::Uint8>(rgb >> 8),
                             static_cast<sf::Uint8>(rgb));
-            int shape = species.getShape();
-            if (shape == 0)
+            Shape shape = species.getShape();
+            if (shape == Shape::Square)
             {
                 rectangle(x + size * .16f, y + size * .16f, size * .65f, size * .65f, color);
             }
             else
             {
-                sf::CircleShape symbol(size * .38f, shape == 1 ? 24 : shape == 2 ? 3 : 4);
+                sf::CircleShape symbol(size * .38f, shape == Shape::Circle     ? 24
+                                                    : shape == Shape::Triangle ? 3
+                                                                               : 4);
                 symbol.setOrigin(size * .38f, size * .38f);
                 symbol.setPosition(x + size * .48f, y + size * .48f);
                 symbol.setFillColor(color);
@@ -104,7 +106,7 @@ void SfmlView::drawWorld(const World &world)
             }
             if (size >= 20)
             {
-                text(string(1, species.getSymbol()), x + size * .29f, y + size * .12f,
+                text(std::string(1, species.getSymbol()), x + size * .29f, y + size * .12f,
                      static_cast<unsigned int>(size * .55f), sf::Color(12, 24, 35));
             }
         }
@@ -140,7 +142,7 @@ void SfmlView::draw(Laboratory &laboratory)
     button("Eliminar", 245, 83, 100, false, laboratory.getActive() != nullptr);
     button("< Mundo", 355, 83, 110, false, laboratory.getCount() > 1);
     button("Mundo >", 475, 83, 110, false, laboratory.getCount() > 1);
-    text("Mundos: " + to_string(laboratory.getCount()), 605, 91, 14);
+    text("Mundos: " + std::to_string(laboratory.getCount()), 605, 91, 14);
     rectangle(810, 130, 440, 585, PANEL);
     Timeline *timeline = laboratory.getActive();
     if (timeline != nullptr)
@@ -150,25 +152,25 @@ void SfmlView::draw(Laboratory &laboratory)
         {
             activeSpecies = 1;
         }
-        text("#" + to_string(laboratory.getActiveId()) + "  " + world.getName(), 30, 128, 20);
-        text(to_string(world.getRows()) + " x " + to_string(world.getColumns()), 665, 135, 14);
+        text("#" + std::to_string(laboratory.getActiveId()) + "  " + world.getName(), 30, 128, 20);
+        text(std::to_string(world.getRows()) + " x " + std::to_string(world.getColumns()), 665, 135, 14);
         drawWorld(world);
         text("ESPECIE ACTIVA / REGLAS", 830, 142, 16, ACCENT);
         for (int i = 1; i <= world.getSpeciesCount(); i++)
         {
-            button(string(1, world.getSpecies(i).getSymbol()), 830.f + (i - 1) * 62, 173, 53,
+            button(std::string(1, world.getSpecies(i).getSymbol()), 830.f + (i - 1) * 62, 173, 53,
                    activeSpecies == i);
         }
         text(world.getSpecies(activeSpecies).getName(), 1090, 179, 14);
-        text("Generacion: " + to_string(world.getGeneration()) +
-                 "    Historial: " + to_string(timeline->getHistoryCount()),
+        text("Generacion: " + std::to_string(world.getGeneration()) +
+                 "    Historial: " + std::to_string(timeline->getHistoryCount()),
              830, 218, 16);
-        text("Celdas vivas: " + to_string(world.getPopulation(0)), 830, 246, 15);
-        string populations;
+        text("Celdas vivas: " + std::to_string(world.getPopulation(0)), 830, 246, 15);
+        std::string populations;
         for (int i = 1; i <= world.getSpeciesCount(); i++)
         {
-            populations +=
-                string(1, world.getSpecies(i).getSymbol()) + ": " + to_string(world.getPopulation(i)) + "   ";
+            populations += std::string(1, world.getSpecies(i).getSymbol()) + ": " +
+                           std::to_string(world.getPopulation(i)) + "   ";
         }
         text(populations, 830, 274, 14);
         text("Nacimiento: total de vecinos vivos", 830, 310, 14);
@@ -176,23 +178,23 @@ void SfmlView::draw(Laboratory &laboratory)
         for (int n = 0; n <= 8; n++)
         {
             bool enabled = world.isMoore() || n <= 4;
-            button(to_string(n), 830.f + n * 45, 337, 39, world.getSpecies(activeSpecies).getRule(true, n),
-                   enabled);
-            button(to_string(n), 830.f + n * 45, 409, 39, world.getSpecies(activeSpecies).getRule(false, n),
-                   enabled);
+            button(std::to_string(n), 830.f + n * 45, 337, 39,
+                   world.getSpecies(activeSpecies).getRule(true, n), enabled);
+            button(std::to_string(n), 830.f + n * 45, 409, 39,
+                   world.getSpecies(activeSpecies).getRule(false, n), enabled);
         }
         text("Resaltado = regla habilitada. Clic para alternar.", 830, 450, 12);
         button(world.isMoore() ? "Moore (8)" : "Von Neumann (4)", 830, 477, 200);
         button(world.isWrapped() ? "Borde: toroidal" : "Borde: cerrado", 1040, 477, 190);
-        text("Velocidad: " + to_string(world.getSpeed()) + " gen/s", 830, 526, 14);
+        text("Velocidad: " + std::to_string(laboratory.getSpeed()) + " gen/s", 830, 526, 14);
         button("-", 1130, 519, 42);
         button("+", 1184, 519, 42);
         button(world.isMutationEnabled() ? "Mutacion: SI" : "Mutacion: NO", 830, 566, 170,
                world.isMutationEnabled());
-        text(to_string(world.getMutationPercent()) + " %", 1010, 573, 15);
+        text(std::to_string(world.getMutationPercent()) + " %", 1010, 573, 15);
         button("-", 1130, 566, 42);
         button("+", 1184, 566, 42);
-        text("Densidad: " + to_string(world.getDensity()) + " %", 830, 621, 14);
+        text("Densidad: " + std::to_string(laboratory.getDensity()) + " %", 830, 621, 14);
         button("-", 1130, 614, 42);
         button("+", 1184, 614, 42);
         text("W cuadrado | S circulo | G triangulo | Q rombo", 830, 668, 12);
@@ -235,7 +237,7 @@ void SfmlView::stop()
     rightDown = false;
     playbackClock.restart();
 }
-void SfmlView::changed(Timeline &timeline, const string &detail)
+void SfmlView::changed(Timeline &timeline, const std::string &detail)
 {
     bool hadFuture = timeline.hasNext();
     timeline.discardFuture();
@@ -251,7 +253,7 @@ void SfmlView::openCreation()
     focusedField = 0;
     message = "";
 }
-bool SfmlView::parseInteger(const string &value, int &result)
+bool SfmlView::parseInteger(const std::string &value, int &result)
 {
     if (value.empty() || value.size() > 3)
     {
@@ -270,9 +272,11 @@ bool SfmlView::parseInteger(const string &value, int &result)
 }
 void SfmlView::submitCreation(Laboratory &laboratory)
 {
-    int rows, columns, count;
+    int rows = 0;
+    int columns = 0;
+    int count = 0;
     if (!parseInteger(fields[1], rows) || !parseInteger(fields[2], columns) ||
-        !parseInteger(fields[3], count) || !laboratory.create(fields[0], rows, columns, count))
+        !parseInteger(fields[3], count) || !laboratory.create(fields[0], WorldSize{rows, columns}, count))
     {
         message = "Datos invalidos: nombre; tamano 5-50; especies 3-4.";
         return;
@@ -439,10 +443,7 @@ void SfmlView::click(Laboratory &laboratory)
         float x = i == 0 ? 1130.f : 1184.f;
         if (hit(x, 519, 42, 32))
         {
-            if (world.setSpeed(world.getSpeed() + direction))
-            {
-                changed(*timeline, "Velocidad actualizada.");
-            }
+            laboratory.setSpeed(laboratory.getSpeed() + direction);
             return;
         }
         if (hit(x, 566, 42, 32))
@@ -455,10 +456,7 @@ void SfmlView::click(Laboratory &laboratory)
         }
         if (hit(x, 614, 42, 32))
         {
-            if (world.setDensity(world.getDensity() + direction * 5))
-            {
-                changed(*timeline, "Densidad actualizada.");
-            }
+            laboratory.setDensity(laboratory.getDensity() + direction * 5);
             return;
         }
     }
@@ -493,7 +491,7 @@ void SfmlView::click(Laboratory &laboratory)
     }
     if (hit(510, 751, 110, 32))
     {
-        world.seedRandom();
+        world.seedRandom(laboratory.getDensity());
         changed(*timeline, "Siembra aleatoria aplicada.");
         return;
     }
@@ -562,7 +560,7 @@ void SfmlView::processEvent(const sf::Event &event, Laboratory &laboratory)
     if (creating && event.type == sf::Event::TextEntered)
     {
         sf::Uint32 character = event.text.unicode;
-        string &value = fields[focusedField];
+        std::string &value = fields[focusedField];
         if (character == 8 && !value.empty())
         {
 
@@ -679,7 +677,7 @@ void SfmlView::run(Laboratory &laboratory)
         }
         const Timeline *active = laboratory.getActive();
         if (playing && active != nullptr &&
-            playbackClock.getElapsedTime().asSeconds() >= 1.f / active->getWorld().getSpeed())
+            playbackClock.getElapsedTime().asSeconds() >= 1.f / laboratory.getSpeed())
         {
             laboratory.getActive()->forward();
             playbackClock.restart();

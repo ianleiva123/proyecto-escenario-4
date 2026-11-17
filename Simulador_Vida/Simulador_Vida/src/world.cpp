@@ -2,82 +2,113 @@
 #include <cstdlib>
 #include <stdexcept>
 #include <utility>
-World::World(const string &newName, int newRows, int newColumns, int newSpeciesCount)
-    : name(newName), rows(newRows), columns(newColumns), speciesCount(newSpeciesCount), generation(0),
-      cells(nullptr), moore(true), wrapped(false), speed(5), mutationPercent(10), density(30),
-      mutationEnabled(false)
+
+SpeciesId **World::createMatrix(WorldSize newSize)
 {
-    if (!validConfiguration(name, rows, columns, speciesCount))
+    SpeciesId **matrix = new SpeciesId *[newSize.rows]();
+    try
     {
-        throw invalid_argument("Configuracion invalida");
+        for (int row = 0; row < newSize.rows; row++)
+        {
+            matrix[row] = new SpeciesId[newSize.columns]();
+        }
     }
-    for (int i = 0; i < 4; i++)
+    catch (...)
     {
-        species[i] = nullptr;
+        deleteMatrix(matrix, newSize.rows);
+        throw;
     }
-    species[0] = new Worker();
-    species[1] = new Scout();
-    species[2] = new Guardian();
-    if (speciesCount == 4)
+    return matrix;
+}
+void World::deleteMatrix(SpeciesId **matrix, int rowCount)
+{
+    if (matrix != nullptr)
     {
-        species[3] = new Queen();
-    }
-    cells = new int *[rows];
-    for (int r = 0; r < rows; r++)
-    {
-        cells[r] = new int[columns]();
+        for (int row = 0; row < rowCount; row++)
+        {
+            delete[] matrix[row];
+        }
+        delete[] matrix;
     }
 }
-bool World::validConfiguration(const string &name, int rows, int columns, int speciesCount)
+World::World(const std::string &newName, WorldSize newSize, int newSpeciesCount)
+    : name(newName), size(newSize), speciesCount(newSpeciesCount), generation(0), cellMatrix(nullptr),
+      species{}, moore(true), wrapped(false), mutationPercent(10), mutationEnabled(false),
+      randomState(static_cast<std::uint32_t>(std::rand()) + 1u)
 {
-    return !name.empty() && name.size() <= 24 && rows >= 5 && rows <= 50 && columns >= 5 && columns <= 50 &&
-           speciesCount >= 3 && speciesCount <= 4;
+    if (!validConfiguration(name, size, speciesCount))
+    {
+        throw std::invalid_argument("Configuración de mundo inválida.");
+    }
+    try
+    {
+        species[0] = new Worker();
+        species[1] = new Scout();
+        species[2] = new Guardian();
+        if (speciesCount == MAX_SPECIES)
+        {
+            species[MAX_SPECIES - 1] = new Queen();
+        }
+        cellMatrix = createMatrix(size);
+    }
+    catch (...)
+    {
+        release();
+        throw;
+    }
+}
+bool World::validConfiguration(const std::string &value, WorldSize dimensions, int count)
+{
+    bool validName = !value.empty() && value.size() <= MAX_NAME_LENGTH;
+    for (unsigned char character : value)
+    {
+        if (character < 32 || character == 127)
+        {
+            validName = false;
+        }
+    }
+    return validName && dimensions.rows >= MIN_SIZE && dimensions.rows <= MAX_SIZE &&
+           dimensions.columns >= MIN_SIZE && dimensions.columns <= MAX_SIZE && count >= MIN_SPECIES &&
+           count <= MAX_SPECIES;
 }
 void World::release()
 {
-    if (cells != nullptr)
+    deleteMatrix(cellMatrix, size.rows);
+    cellMatrix = nullptr;
+    for (int index = 0; index < MAX_SPECIES; index++)
     {
-        for (int r = 0; r < rows; r++)
-        {
-            delete[] cells[r];
-        }
-        delete[] cells;
+        delete species[index];
+        species[index] = nullptr;
     }
-    for (int i = 0; i < 4; i++)
-    {
-        delete species[i];
-        species[i] = nullptr;
-    }
-    cells = nullptr;
 }
 void World::copyFrom(const World &other)
 {
-    name = other.name;
-    rows = other.rows;
-    columns = other.columns;
-    speciesCount = other.speciesCount;
-    generation = other.generation;
-    moore = other.moore;
-    wrapped = other.wrapped;
-    speed = other.speed;
-    mutationPercent = other.mutationPercent;
-    density = other.density;
-    mutationEnabled = other.mutationEnabled;
-    for (int i = 0; i < 4; i++)
+    try
     {
-        species[i] = other.species[i] == nullptr ? nullptr : other.species[i]->clone();
-    }
-    cells = new int *[rows];
-    for (int r = 0; r < rows; r++)
-    {
-        cells[r] = new int[columns];
-        for (int c = 0; c < columns; c++)
+        for (int index = 0; index < speciesCount; index++)
         {
-            cells[r][c] = other.cells[r][c];
+            species[index] = other.species[index]->clone();
         }
+        cellMatrix = createMatrix(size);
+        for (int row = 0; row < size.rows; row++)
+        {
+            for (int column = 0; column < size.columns; column++)
+            {
+                cellMatrix[row][column] = other.cellMatrix[row][column];
+            }
+        }
+    }
+    catch (...)
+    {
+        release();
+        throw;
     }
 }
 World::World(const World &other)
+    : name(other.name), size(other.size), speciesCount(other.speciesCount), generation(other.generation),
+      cellMatrix(nullptr), species{}, moore(other.moore), wrapped(other.wrapped),
+      mutationPercent(other.mutationPercent), mutationEnabled(other.mutationEnabled),
+      randomState(other.randomState)
 {
     copyFrom(other);
 }
@@ -90,44 +121,45 @@ World &World::operator=(const World &other)
     if (this != &other)
     {
         World copy(other);
-        using std::swap;
-        swap(name, copy.name);
-        swap(rows, copy.rows);
-        swap(columns, copy.columns);
-        swap(speciesCount, copy.speciesCount);
-        swap(generation, copy.generation);
-        swap(cells, copy.cells);
-        for (int i = 0; i < 4; i++)
-        {
-            swap(species[i], copy.species[i]);
-        }
-        swap(moore, copy.moore);
-        swap(wrapped, copy.wrapped);
-        swap(speed, copy.speed);
-        swap(mutationPercent, copy.mutationPercent);
-        swap(density, copy.density);
-        swap(mutationEnabled, copy.mutationEnabled);
+        swap(copy);
     }
     return *this;
 }
-const string &World::getName() const
+void World::swap(World &other) noexcept
+{
+    name.swap(other.name);
+    std::swap(size, other.size);
+    std::swap(speciesCount, other.speciesCount);
+    std::swap(generation, other.generation);
+    std::swap(cellMatrix, other.cellMatrix);
+    for (int index = 0; index < MAX_SPECIES; index++)
+    {
+        std::swap(species[index], other.species[index]);
+    }
+    std::swap(moore, other.moore);
+    std::swap(wrapped, other.wrapped);
+    std::swap(mutationPercent, other.mutationPercent);
+    std::swap(mutationEnabled, other.mutationEnabled);
+    std::swap(randomState, other.randomState);
+}
+const std::string &World::getName() const
 {
     return name;
 }
-void World::setName(const string &value)
+void World::setName(const std::string &value)
 {
-    if (!value.empty() && value.size() <= 24)
+    if (validConfiguration(value, size, speciesCount))
     {
         name = value;
     }
 }
 int World::getRows() const
 {
-    return rows;
+    return size.rows;
 }
 int World::getColumns() const
 {
-    return columns;
+    return size.columns;
 }
 int World::getSpeciesCount() const
 {
@@ -137,31 +169,46 @@ int World::getGeneration() const
 {
     return generation;
 }
-int World::getCell(int r, int c) const
+int World::getCell(int row, int column) const
 {
-    return r >= 0 && r < rows && c >= 0 && c < columns ? cells[r][c] : 0;
+    if (row < 0 || row >= size.rows || column < 0 || column >= size.columns)
+    {
+        return 0;
+    }
+    return static_cast<int>(cellMatrix[row][column]);
 }
-bool World::setCell(int r, int c, int value)
+bool World::setCell(int row, int column, int value)
 {
-    if (r < 0 || r >= rows || c < 0 || c >= columns || value < 0 || value > speciesCount ||
-        cells[r][c] == value)
+    if (row < 0 || row >= size.rows || column < 0 || column >= size.columns || value < 0 ||
+        value > speciesCount || getCell(row, column) == value)
     {
         return false;
     }
-    cells[r][c] = value;
+    cellMatrix[row][column] = static_cast<SpeciesId>(value);
     return true;
 }
 const SpeciesBase &World::getSpecies(int id) const
 {
     if (id < 1 || id > speciesCount)
     {
-        throw out_of_range("Especie invalida");
+        throw std::out_of_range("Especie inválida.");
     }
     return *species[id - 1];
 }
 bool World::toggleRule(int id, bool isBirth, int neighbors)
 {
-    return id >= 1 && id <= speciesCount && species[id - 1]->toggleRule(isBirth, neighbors);
+    if (id < 1 || id > speciesCount)
+    {
+        return false;
+    }
+    return species[id - 1]->toggleRule(isBirth, neighbors);
+}
+void World::setRules(int id, const bool birth[RULE_COUNT], const bool survival[RULE_COUNT])
+{
+    if (id >= 1 && id <= speciesCount)
+    {
+        species[id - 1]->setRules(birth, survival);
+    }
 }
 bool World::isMoore() const
 {
@@ -179,39 +226,13 @@ void World::toggleBorder()
 {
     wrapped = !wrapped;
 }
-int World::getSpeed() const
-{
-    return speed;
-}
-bool World::setSpeed(int value)
-{
-    if (value < 1 || value > 20 || value == speed)
-    {
-        return false;
-    }
-    speed = value;
-    return true;
-}
-int World::getDensity() const
-{
-    return density;
-}
-bool World::setDensity(int value)
-{
-    if (value < 0 || value > 100 || value == density)
-    {
-        return false;
-    }
-    density = value;
-    return true;
-}
 int World::getMutationPercent() const
 {
     return mutationPercent;
 }
 bool World::setMutationPercent(int value)
 {
-    if (value < 0 || value > 100 || value == mutationPercent)
+    if (value < 0 || value > PERCENT_BASE || value == mutationPercent)
     {
         return false;
     }
@@ -229,11 +250,12 @@ void World::toggleMutation()
 int World::getPopulation(int id) const
 {
     int count = 0;
-    for (int r = 0; r < rows; r++)
+    for (int row = 0; row < size.rows; row++)
     {
-        for (int c = 0; c < columns; c++)
+        for (int column = 0; column < size.columns; column++)
         {
-            if (id == 0 ? cells[r][c] != 0 : cells[r][c] == id)
+            int value = getCell(row, column);
+            if ((id == 0 && value != 0) || (id > 0 && value == id))
             {
                 count++;
             }
@@ -243,51 +265,62 @@ int World::getPopulation(int id) const
 }
 void World::clear()
 {
-    for (int r = 0; r < rows; r++)
+    for (int row = 0; row < size.rows; row++)
     {
-        for (int c = 0; c < columns; c++)
+        for (int column = 0; column < size.columns; column++)
         {
-            cells[r][c] = 0;
+            cellMatrix[row][column] = SpeciesId::Empty;
         }
     }
 }
-void World::seedRandom()
+unsigned int World::nextRandom()
 {
-    clear();
-    for (int r = 0; r < rows; r++)
+    randomState = randomState * 1664525u + 1013904223u;
+    return randomState;
+}
+void World::seedRandom(int densityPercent)
+{
+    if (densityPercent < 0 || densityPercent > PERCENT_BASE)
     {
-        for (int c = 0; c < columns; c++)
+        return;
+    }
+    clear();
+    for (int row = 0; row < size.rows; row++)
+    {
+        for (int column = 0; column < size.columns; column++)
         {
-            if (rand() % 100 < density)
+            if (static_cast<int>((nextRandom() >> 8) % PERCENT_BASE) < densityPercent)
             {
-                cells[r][c] = 1 + rand() % speciesCount;
+                cellMatrix[row][column] = static_cast<SpeciesId>(1 + (nextRandom() >> 8) % speciesCount);
             }
         }
     }
 }
 bool World::seedPattern(int row, int column)
 {
-    if (row < 0 || column < 0 || row + 2 >= rows || column + 2 >= columns)
+    if (row < 0 || column < 0 || row + PATTERN_SIZE > size.rows || column + PATTERN_SIZE > size.columns)
     {
         return false;
     }
-    const int pattern[3][3] = {{0, 1, 0}, {0, 0, 2}, {3, 3, 3}};
-
-    for (int r = 0; r < 3; r++)
+    const SpeciesId pattern[PATTERN_SIZE][PATTERN_SIZE] = {
+        {SpeciesId::Empty, SpeciesId::Worker, SpeciesId::Empty},
+        {SpeciesId::Empty, SpeciesId::Empty, SpeciesId::Scout},
+        {SpeciesId::Guardian, SpeciesId::Guardian, SpeciesId::Guardian}};
+    for (int r = 0; r < PATTERN_SIZE; r++)
     {
-        for (int c = 0; c < 3; c++)
+        for (int c = 0; c < PATTERN_SIZE; c++)
         {
-            cells[row + r][column + c] = pattern[r][c];
+            cellMatrix[row + r][column + c] = pattern[r][c];
         }
     }
     return true;
 }
-void World::countNeighbors(int row, int column, int counts[4], int &total) const
+void World::countNeighbors(int row, int column, int counts[MAX_SPECIES], int &total) const
 {
     total = 0;
-    for (int i = 0; i < 4; i++)
+    for (int index = 0; index < MAX_SPECIES; index++)
     {
-        counts[i] = 0;
+        counts[index] = 0;
     }
     for (int dr = -1; dr <= 1; dr++)
     {
@@ -297,11 +330,16 @@ void World::countNeighbors(int row, int column, int counts[4], int &total) const
             {
                 continue;
             }
-            int r = row + dr, c = column + dc;
+            int r = row + dr;
+            int c = column + dc;
             if (wrapped)
             {
-                r = (r + rows) % rows;
-                c = (c + columns) % columns;
+                r = (r + size.rows) % size.rows;
+                c = (c + size.columns) % size.columns;
+            }
+            if (r == row && c == column)
+            {
+                continue;
             }
             int value = getCell(r, c);
             if (value != 0)
@@ -312,57 +350,53 @@ void World::countNeighbors(int row, int column, int counts[4], int &total) const
         }
     }
 }
-void World::evolve()
+bool World::evolve()
 {
-    int **next = new int *[rows];
-    for (int r = 0; r < rows; r++)
+    if (generation >= MAX_GENERATION)
     {
-        next[r] = new int[columns]();
+        return false;
     }
-    for (int r = 0; r < rows; r++)
+    SpeciesId **nextMatrix = createMatrix(size);
+    for (int row = 0; row < size.rows; row++)
     {
-        for (int c = 0; c < columns; c++)
+        for (int column = 0; column < size.columns; column++)
         {
-            int counts[4], total;
-            countNeighbors(r, c, counts, total);
-            int current = cells[r][c];
+            int counts[MAX_SPECIES] = {};
+            int total = 0;
+            countNeighbors(row, column, counts, total);
+            int current = getCell(row, column);
             if (current == 0)
             {
                 int best = 0;
-
-                for (int i = 1; i < speciesCount; i++)
+                for (int index = 1; index < speciesCount; index++)
                 {
-                    if (counts[i] > counts[best])
+                    if (counts[index] > counts[best])
                     {
-                        best = i;
+                        best = index;
                     }
                 }
                 if (species[best]->canBeBorn(total))
                 {
-                    next[r][c] = best + 1;
+                    nextMatrix[row][column] = static_cast<SpeciesId>(best + 1);
                 }
             }
             else if (species[current - 1]->survives(total))
             {
-                next[r][c] = current;
-                if (mutationEnabled && rand() % 100 < mutationPercent)
+                int candidate = current;
+                if (mutationEnabled && static_cast<int>((nextRandom() >> 8) % PERCENT_BASE) < mutationPercent)
                 {
-
-                    int candidate = 1 + rand() % (speciesCount - 1);
+                    candidate = 1 + (nextRandom() >> 8) % (speciesCount - 1);
                     if (candidate >= current)
                     {
                         candidate++;
                     }
-                    next[r][c] = candidate;
                 }
+                nextMatrix[row][column] = static_cast<SpeciesId>(candidate);
             }
         }
     }
-    for (int r = 0; r < rows; r++)
-    {
-        delete[] cells[r];
-    }
-    delete[] cells;
-    cells = next;
+    deleteMatrix(cellMatrix, size.rows);
+    cellMatrix = nextMatrix;
     generation++;
+    return true;
 }
