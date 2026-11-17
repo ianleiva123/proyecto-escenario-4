@@ -2,8 +2,7 @@
 #include "laboratory.h"
 class View
 {
-public:
-    virtual ~View() {}
-    virtual void run(Laboratory& laboratory) = 0;
-
+  public:
+    virtual ~View(){}
+    virtual void run(Laboratory &laboratory) = 0;
 };

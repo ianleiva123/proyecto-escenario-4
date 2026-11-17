@@ -1,36 +1,37 @@
 #pragma once
-#include <string>
 #include "species.h"
+#include <string>
 
 using namespace std;
 class World
 {
-private:
+  private:
     string name;
     int rows, columns, speciesCount, generation;
-    int** cells;
-    SpeciesBase* species[4];
+    int **cells;
+    SpeciesBase *species[4];
     bool moore, wrapped;
     int speed, mutationPercent, density;
     bool mutationEnabled;
     void release();
-    void copyFrom(const World& other);
-    void countNeighbors(int row, int column, int counts[4], int& total) const;
-public:
-    World(const string& newName = "Mundo", int newRows = 20, int newColumns = 25, int newSpeciesCount = 3);
-    World(const World& other);
+    void copyFrom(const World &other);
+    void countNeighbors(int row, int column, int counts[4], int &total) const;
+
+  public:
+    World(const string &newName = "Mundo", int newRows = 20, int newColumns = 25, int newSpeciesCount = 3);
+    World(const World &other);
     ~World();
-    World& operator=(const World& other);
-    static bool validConfiguration(const string& name, int rows, int columns, int speciesCount);
-    const string& getName() const;
-    void setName(const string& newName);
+    World &operator=(const World &other);
+    static bool validConfiguration(const string &name, int rows, int columns, int speciesCount);
+    const string &getName() const;
+    void setName(const string &newName);
     int getRows() const;
     int getColumns() const;
     int getSpeciesCount() const;
     int getGeneration() const;
     int getCell(int row, int column) const;
     bool setCell(int row, int column, int value);
-    const SpeciesBase& getSpecies(int id) const;
+    const SpeciesBase &getSpecies(int id) const;
     bool toggleRule(int id, bool isBirth, int neighbors);
     bool isMoore() const;
     bool isWrapped() const;
