@@ -21,6 +21,7 @@ class Configuration
 
   public:
     Configuration();
+    bool load(const std::string &path, std::string &message);
     bool allows(WorldSize size, int speciesCount) const;
     void applyTo(World &world) const;
     WorldSize getDefaultSize() const;

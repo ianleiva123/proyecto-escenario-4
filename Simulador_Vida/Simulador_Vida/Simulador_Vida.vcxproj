@@ -176,4 +176,17 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+<PropertyGroup>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <Target Name="CopyConfigurationAndAssets" AfterTargets="Build">
+    <ItemGroup>
+      <AssetFiles Include="$(ProjectDir)assets\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(AssetFiles)" DestinationFiles="@(AssetFiles-&gt;'$(OutDir)assets\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(ProjectDir)config.ini" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" Condition="Exists('$(ProjectDir)config.ini')" />
+  </Target>
+  <ItemGroup>
+    <None Include="config.ini" />
+  </ItemGroup>
 </Project>
