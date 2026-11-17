@@ -163,6 +163,7 @@
     <ClInclude Include="src\configuration.h" />
     <ClInclude Include="src\settings.h" />
     <ClInclude Include="src\layout.h" />
+    <ClInclude Include="src\file_manager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Simulador_Vida.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="src\laboratory.cpp" />
     <ClCompile Include="src\sfml_view.cpp" />
     <ClCompile Include="src\configuration.cpp" />
+    <ClCompile Include="src\file_manager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
