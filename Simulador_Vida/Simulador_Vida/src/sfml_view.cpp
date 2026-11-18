@@ -1,4 +1,5 @@
 #include "sfml_view.h"
+#include "file_manager.h"
 #include <algorithm>
 #include <sstream>
 namespace
@@ -170,7 +171,7 @@ void SfmlView::drawWorld(const World &world)
 void SfmlView::drawTop(const Laboratory &laboratory)
 {
     text("ENJAMBRE / LABORATORIO", 30, 22, 25, ACCENT);
-    text("Mundos independientes. Historial acotado y controles gráficos.", 30, 54, 13);
+    text("Mundos independientes. Archivos de texto. Historial recuperable.", 30, 54, 13);
     bool active = laboratory.getActive() != nullptr;
     button(Control::Create, "Nuevo");
     button(Control::Duplicate, "Duplicar", false, active);
@@ -179,6 +180,8 @@ void SfmlView::drawTop(const Laboratory &laboratory)
     button(Control::NextWorld, "Mundo >", false, laboratory.getCount() > 1);
     text("Mundos: " + std::to_string(laboratory.getCount()) + "/" + std::to_string(MAX_WORLDS), 605, 91, 14);
     button(Control::NewLab, "Nuevo laboratorio");
+    button(Control::Save, "Guardar");
+    text("Archivo: " + fileName, 410, 132, 13);
 }
 void SfmlView::drawInformation(const Laboratory &laboratory, const Timeline &timeline)
 {
@@ -317,7 +320,7 @@ void SfmlView::draw(Laboratory &laboratory)
         text("No hay mundos. Usa Nuevo mundo o Cargar.", 30, 210, 20);
     }
     wrappedText(message, 30, 835);
-    text("Espacio: pausa | Flechas: tiempo | 1–4: especie | Tab: mundo", 30, 875, 12);
+    text("Espacio: pausa | Flechas: tiempo | 1–4: especie | Tab: mundo | Ctrl+S: guardar", 30, 875, 12);
     if (modal != Modal::None)
     {
         drawModal();
@@ -424,8 +427,33 @@ void SfmlView::confirmModal(Laboratory &laboratory)
         message = "Laboratorio nuevo. Usa Nuevo mundo para comenzar.";
         return;
     }
+    if (!validFileName())
+    {
+        notice = "Usa un nombre como laboratorio.txt (letras, números, guion o punto).";
+        return;
+    }
+    bool success = false;
+    if (modal == Modal::Save)
+    {
+        laboratory.setPlaying(resumeAfterModal);
+        success = FileManager::save(laboratory, fileName, notice);
+        laboratory.setPlaying(false);
+        if (success)
+        {
+            laboratory.setPlaying(resumeAfterModal);
+        }
+    }
+    else if (modal == Modal::Load)
+    {
+        success = FileManager::load(laboratory, fileName, notice);
+    }
+    if (success)
+    {
+        modal = Modal::None;
+        message = notice;
+        playbackClock.restart();
+    }
 }
-
 void SfmlView::paint(Laboratory &laboratory, bool erase)
 {
     Timeline *timeline = laboratory.getActive();
@@ -472,6 +500,10 @@ bool SfmlView::handleTop(Laboratory &laboratory)
     else if (over(Control::NewLab))
     {
         openModal(Modal::NewLab, laboratory);
+    }
+    else if (over(Control::Save))
+    {
+        openModal(Modal::Save, laboratory);
     }
 
     else if (over(Control::Duplicate))
@@ -751,6 +783,11 @@ void SfmlView::processKey(const sf::Event::KeyEvent &key, Laboratory &laboratory
         {
             replaceInput = true;
         }
+        return;
+    }
+    if (key.control && key.code == sf::Keyboard::S)
+    {
+        openModal(Modal::Save, laboratory);
         return;
     }
 
