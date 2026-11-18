@@ -230,6 +230,8 @@ void FileManager::readLaboratory(std::istream &input, Laboratory &laboratory)
                     "Metadatos históricos inválidos.");
             highestId = id;
             World firstWorld = readWorld(input, lineNumber, totalCells);
+            require(firstWorld.getGeneration() == discarded,
+                    "El comienzo retenido no coincide con los estados liberados.");
             Laboratory::WorldNode *node = new Laboratory::WorldNode(id, firstWorld, limit);
             laboratory.append(node);
             node->history.discardedPast = discarded;

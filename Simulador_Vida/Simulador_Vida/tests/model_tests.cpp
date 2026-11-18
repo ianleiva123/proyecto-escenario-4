@@ -211,6 +211,16 @@ int main()
         check(FileManager::load(loaded, "test_empty.txt", message), "Load empty laboratory");
         check(emptySave == snapshot(loaded, "test_after.txt"), "Empty lab round trip");
         check(loaded.create("Después", WorldSize{5, 5}, 3), "Continue after empty load");
+        std::string badHistory = safe;
+        std::size_t header = badHistory.find("WORLD ");
+        std::size_t endHeader = badHistory.find('\n', header);
+        std::string headerText = badHistory.substr(header, endHeader - header);
+        headerText.back() = '1';
+        badHistory.replace(header, endHeader - header, headerText);
+        write("test_corrupt.txt", badHistory);
+        check(!FileManager::load(original, "test_corrupt.txt", message),
+              "Reject inconsistent retained history");
+        check(safe == snapshot(original, "test_after.txt"), "Historical mismatch preserves open lab");
         Configuration capped;
         write("test_config.ini", "[defaults]\nhistory_limit=3\n");
         check(capped.load("test_config.ini", message), "Cap config");
