@@ -181,6 +181,7 @@ void SfmlView::drawTop(const Laboratory &laboratory)
     text("Mundos: " + std::to_string(laboratory.getCount()) + "/" + std::to_string(MAX_WORLDS), 605, 91, 14);
     button(Control::NewLab, "Nuevo laboratorio");
     button(Control::Save, "Guardar");
+    button(Control::Load, "Cargar");
     text("Archivo: " + fileName, 410, 132, 13);
 }
 void SfmlView::drawInformation(const Laboratory &laboratory, const Timeline &timeline)
@@ -320,7 +321,8 @@ void SfmlView::draw(Laboratory &laboratory)
         text("No hay mundos. Usa Nuevo mundo o Cargar.", 30, 210, 20);
     }
     wrappedText(message, 30, 835);
-    text("Espacio: pausa | Flechas: tiempo | 1–4: especie | Tab: mundo | Ctrl+S: guardar", 30, 875, 12);
+    text("Espacio: pausa | Flechas: tiempo | 1–4: especie | Tab: mundo | Ctrl+S: guardar | Ctrl+O: cargar",
+         30, 875, 12);
     if (modal != Modal::None)
     {
         drawModal();
@@ -505,7 +507,10 @@ bool SfmlView::handleTop(Laboratory &laboratory)
     {
         openModal(Modal::Save, laboratory);
     }
-
+    else if (over(Control::Load))
+    {
+        openModal(Modal::Load, laboratory);
+    }
     else if (over(Control::Duplicate))
     {
         stop(laboratory);
@@ -790,7 +795,11 @@ void SfmlView::processKey(const sf::Event::KeyEvent &key, Laboratory &laboratory
         openModal(Modal::Save, laboratory);
         return;
     }
-
+    if (key.control && key.code == sf::Keyboard::O)
+    {
+        openModal(Modal::Load, laboratory);
+        return;
+    }
     if (key.code == sf::Keyboard::N)
     {
         openModal(Modal::Create, laboratory);
